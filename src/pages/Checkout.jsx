@@ -1,4 +1,5 @@
 import { useCart } from "../context/CartContext";
+import { useState } from "react";
 
 export default function Checkout() {
   const {
@@ -9,62 +10,105 @@ export default function Checkout() {
     clearCart,
   } = useCart();
   const cartItems = getCartItemsWithProducts();
-
   const total = getCartTotal();
+  const [orderError, setOrderError] = useState(null);
+  const [orderSuccess, setOrderSuccess] = useState(false);
 
   function placeOrder() {
-    alert("Successful Order!");
+    setOrderError(null);
+    setOrderSuccess(false);
+
+    if (cartItems.length === 0) {
+      setOrderError("Your cart is empty. Add some products before placing an order.");
+      return;
+    }
+
+    setOrderSuccess(true);
     clearCart();
   }
+
   return (
     <div className="page">
       <div className="container">
         <h1 className="page-title">Checkout</h1>
+
+        {orderSuccess && (
+          <div className="success-message" style={{
+            background: "#d4edda",
+            color: "#155724",
+            padding: "1rem",
+            borderRadius: "8px",
+            marginBottom: "1.5rem",
+            border: "1px solid #c3e6cb"
+          }}>
+            ✅ Order placed successfully!
+          </div>
+        )}
+
+        {orderError && (
+          <div className="error-message" style={{
+            background: "#f8d7da",
+            color: "#721c24",
+            padding: "1rem",
+            borderRadius: "8px",
+            marginBottom: "1.5rem",
+            border: "1px solid #f5c6cb"
+          }}>
+            {orderError}
+          </div>
+        )}
+
         <div className="checkout-container">
           <div className="checkout-items">
             <h2 className="checkout-section-title">Order Summary</h2>
-            {cartItems.map((item) => (
-              <div className="checkout-item" key={item.id}>
-                <img
-                  src={item.product.image}
-                  alt={item.product.name}
-                  className="checkout-item-image"
-                />
-                <div className="checkout-item-details">
-                  <h3 className="checkout-item-name">{item.product.name}</h3>
-                  <p className="checkout-item-price">
-                    Rs{item.product.price} each
-                  </p>
-                </div>
-                <div className="checkout-item-controls">
-                  <div className="quantity-controls">
+            {cartItems.length === 0 ? (
+              <p style={{ padding: "1.5rem", textAlign: "center", color: "#888" }}>
+                Your cart is empty.
+              </p>
+            ) : (
+              cartItems.map((item) => (
+                <div className="checkout-item" key={item.id}>
+                  <img
+                    src={item.product.image}
+                    alt={item.product.name}
+                    className="checkout-item-image"
+                  />
+                  <div className="checkout-item-details">
+                    <h3 className="checkout-item-name">{item.product.name}</h3>
+                    <p className="checkout-item-price">
+                      Rs{item.product.price} each
+                    </p>
+                  </div>
+                  <div className="checkout-item-controls">
+                    <div className="quantity-controls">
+                      <button
+                        className="quantity-btn"
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      >
+                        -
+                      </button>
+                      <span className="quantity-value">{item.quantity}</span>
+                      <button
+                        className="quantity-btn"
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <p className="checkout-item-total">
+                      Rs{(item.product.price * item.quantity).toFixed(2)}
+                    </p>
                     <button
-                      className="quantity-btn"
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      className="btn btn-secondary btn-small"
+                      onClick={() => removeFromCart(item.id)}
                     >
-                      -
-                    </button>
-                    <span className="quantity-value">{item.quantity}</span>
-                    <button
-                      className="quantity-btn"
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    >
-                      +
+                      Remove
                     </button>
                   </div>
-
-                  <p className="checkout-item-total">
-                    Rs{(item.product.price * item.quantity).toFixed(2)}
-                  </p>
-                  <button
-                    className="btn btn-secondary btn-small"
-                    onClick={() => removeFromCart(item.id)}
-                  >
-                    Remove
-                  </button>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="checkout-summary">

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 export default function Auth() {
   const [mode, setMode] = useState("signup");
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -17,14 +18,18 @@ export default function Auth() {
     formState: { errors },
   } = useForm();
 
-  function onSubmit(data) {
+  async function onSubmit(data) {
     setError(null);
+    setSubmitting(true);
+
     let result;
     if (mode === "signup") {
-      result = signUp(data.email, data.password);
+      result = await signUp(data.email, data.password);
     } else {
-      result = login(data.email, data.password);
+      result = await login(data.email, data.password);
     }
+
+    setSubmitting(false);
 
     if (result.success) {
       navigate("/");
@@ -47,10 +52,16 @@ export default function Auth() {
                 Email
               </label>
               <input
-                className="form-input"
+                className={`form-input ${errors.email ? "form-input-error" : ""}`}
                 type="email"
                 id="email"
-                {...register("email", { required: "Email is required" })}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Please enter a valid email address",
+                  },
+                })}
               />
               {errors.email && (
                 <span className="form-error">{errors.email.message}</span>
@@ -72,7 +83,7 @@ export default function Auth() {
                     message: "Password must be less than 12 characters",
                   },
                 })}
-                className="form-input"
+                className={`form-input ${errors.password ? "form-input-error" : ""}`}
                 type="password"
                 id="password"
               />
@@ -81,8 +92,16 @@ export default function Auth() {
               )}
             </div>
 
-            <button type="submit" className="btn btn-primary btn-large">
-              {mode === "signup" ? "Sign Up" : "Login"}
+            <button
+              type="submit"
+              className="btn btn-primary btn-large"
+              disabled={submitting}
+            >
+              {submitting
+                ? "Please wait..."
+                : mode === "signup"
+                ? "Sign Up"
+                : "Login"}
             </button>
           </form>
 
