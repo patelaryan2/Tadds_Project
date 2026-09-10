@@ -4,6 +4,16 @@ export interface Product {
   price: number;
   image: string;
   description: string;
+  category: string;
+  rating?: number;
+  reviews_count?: number;
+  stock?: number;
+  discount?: number;
+  featured?: boolean;
+  is_trending?: boolean;
+  is_new?: boolean;
+  brand?: string;
+  created_at?: string;
 }
 
 export interface CartItem {
@@ -23,3 +33,11 @@ export interface AuthResult {
   success: boolean;
   error?: string;
 }
+
+export interface AdminSession {
+  token: string;
+  username: string;
+  expires_at: string;
+}
+
+export type Category = string;
